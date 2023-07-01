@@ -30,9 +30,9 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 
 public class Fragment_2 extends Fragment {
-    private final int STORAGE_REQUEST_CODE = 28;
-    private
-    ImageListAdapter adapter;
+    private ImageListAdapter adapter;
+    private int SIZE = 10;
+    private Cursor cursor;
     ActivityResultLauncher<String> galleryResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
         public void onActivityResult(Boolean result) {
@@ -64,7 +64,7 @@ public class Fragment_2 extends Fragment {
             @Override
             public void onScrollChange(View view, int i, int i1, int i2, int i3) {
                 if(!view.canScrollVertically(1)) {
-
+                    loadMore();
                 }
             }
         });
@@ -99,28 +99,38 @@ public class Fragment_2 extends Fragment {
         //TextView textView;
         if (view == null) {
             button = (Button) getView().findViewById(R.id.button);
-            //textView = (TextView) getView().findViewById(R.id.guideText);
         }
         else {
             button = (Button) view.findViewById(R.id.button);
-            //textView = (TextView) view.findViewById(R.id.guideText);
         }
         button.setVisibility(View.INVISIBLE);
-       // textView.setVisibility(View.INVISIBLE);
-        setImageListToAdapter(getAllImagePaths());
+        setImageListToAdapter(getInitialImagePaths());
     }
 
-
-    private ArrayList<ImageItem> getAllImagePaths() {
-        Uri uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        ArrayList<ImageItem> imageList = new ArrayList<>();
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
-        Cursor cursor = getActivity().getContentResolver().query(uri, projection, null, null, null);
+    private void loadMore() {
         int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-        while (cursor.moveToNext()) {
+        int cnt = 0;
+        int positionStart = adapter.getItemCount();
+        while (cursor.moveToNext() && cnt < SIZE) {
+            String imagePath = cursor.getString(columnIndexData);
+            adapter.addItem(new ImageItem(imagePath));
+            cnt++;
+            Log.d("path", imagePath);
+        }
+        adapter.notifyItemRangeInserted(positionStart, SIZE);
+    }
+
+    private ArrayList<ImageItem> getInitialImagePaths() {
+        ArrayList<ImageItem> imageList = new ArrayList<>();
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.DATE_TAKEN};
+        cursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
+        int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        int cnt = 0;
+        while (cursor.moveToNext() && cnt < SIZE) {
             String imagePath = cursor.getString(columnIndexData);
             imageList.add(new ImageItem(imagePath));
-            Log.d("path", imagePath);
+            cnt++;
+            // Log.d("path", imagePath);
         }
         return imageList;
     }
