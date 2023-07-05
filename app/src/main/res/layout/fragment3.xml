@@ -44,7 +44,7 @@
                     android:id="@+id/headerLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp">
 
                     <TextView
@@ -75,7 +75,7 @@
                         android:id="@+id/writeButton"
                         style="@style/Widget.Material3.Button"
                         android:layout_width="wrap_content"
-                        android:layout_height="0dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:text="기록하기"
                         android:textColor="@color/white"
@@ -92,8 +92,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="16dp"
                     android:layout_marginRight="8dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="8dp"
                     android:background="@drawable/memo_background"
                     android:clipToPadding="true">
 
@@ -194,7 +195,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="16dp"
                         android:text="일정 목록"
                         android:textSize="16sp"
                         android:textStyle="normal"
@@ -260,7 +261,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="16dp"
                         android:text="연락한 사람들"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"
@@ -327,7 +328,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="16dp"
                         android:text="찍은 사진들"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="parent"

@@ -128,9 +128,8 @@ public class Fragment_3 extends Fragment {
         CalendarDay todayCalendarDay = CalendarDay.from(currentYear, currentMonth, currentDate);
         MaterialCalendarView calendar = view.findViewById(R.id.calendar);
         LinearLayout linearLayout = view.findViewById(R.id.linearLayout);
-        calendar.setSelectedDate(todayCalendarDay);
+        calendar.setSelectedDate(CalendarDay.today());
         calendar.state().edit()
-                .isCacheCalendarPositionEnabled(false)
                 .setFirstDayOfWeek(Calendar.SUNDAY)
                 .setMaximumDate(CalendarDay.from(currentYear, currentMonth, cal.getActualMaximum(Calendar.DAY_OF_MONTH)))
                 .setCalendarDisplayMode(CalendarMode.MONTHS)
@@ -148,13 +147,11 @@ public class Fragment_3 extends Fragment {
 
             String memo = pref.getString(getFullDateString(calendarDay.getCalendar().getTimeInMillis()), "");
             if (!memo.equals("")) {
-                Log.d("fragment 3", "add decorator" + calendarDay.getCalendar().get(Calendar.YEAR) + "." + calendarDay.getCalendar().get(Calendar.MONTH) + "." + calendarDay.getCalendar().get(Calendar.DATE));
                 calendarDayArrayList.add(calendarDay);
             }
         }
         calendar.addDecorators(minMaxDecorator, todayDecorator, new CalendarEventDecorator(calendarDayArrayList, getContext()));
         calendar.setOnDateChangedListener((widget, date, selected) -> {
-            Log.d("fragment 3", "call date changed listener");
             if (date.getDate().getTime() > minMaxDecorator.getMaxDay().getDate().getTime()) {
                 linearLayout.setVisibility(View.GONE);
                 Toast.makeText(getContext(), "미래의 한줄 기록은 작성할 수 없어요", Toast.LENGTH_SHORT).show();
@@ -365,7 +362,6 @@ public class Fragment_3 extends Fragment {
     }
     private void getImagePathsByDate(int year, int month, int date) {
         if (!permissionViewModel.getIsGalleryAccepted().getValue()) return;
-        Log.d("getImagePathsByDate0", year + "." + month + "." + this.date);
         String minTimestamp = String.valueOf(dateToTimestamp(year, month, date));
         String maxTimestamp = String.valueOf(dateToTimestamp(year, month, date + 1));
         ArrayList<ImageItem> imageList = new ArrayList<>();

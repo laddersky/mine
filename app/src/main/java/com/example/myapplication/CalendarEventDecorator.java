@@ -36,7 +36,7 @@ public class CalendarEventDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.addSpan(new DotSpan(5F, context.getColor(R.color.colorPrimary)));
+        view.addSpan(new DotSpan(6F, context.getColor(R.color.colorPrimary)));
     }
 
     public void addItem(CalendarDay calendarDay) {
