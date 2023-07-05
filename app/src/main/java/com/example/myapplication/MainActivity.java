@@ -70,6 +70,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.SearchView;
@@ -162,6 +163,18 @@ public class MainActivity extends AppCompatActivity {
                         searchView.setLayoutParams(layoutParams);
                         return;
                     }
+                    //이부분 추가
+                    LinearLayout bottom_bar = fragmentView.findViewById(R.id.bottom_bar);
+                    if (bottom_bar.getVisibility() == View.VISIBLE){
+                        bottom_bar.setVisibility(View.INVISIBLE);
+
+                        fragment1.adapter.display = false;
+                        fragment1.add_contact.setVisibility(View.VISIBLE);
+                        fragment1.adapter.delete_list.clear();
+                        fragment1.adapter.notifyDataSetChanged();
+                        return;
+                    }
+                    //여기까지
                     // searchView를 사용하여 활성화 여부 판단 및 로직 수행
                 }
             }

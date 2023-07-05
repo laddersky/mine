@@ -77,13 +77,14 @@ public class Fragment_1 extends Fragment {
     private LinearLayout Bottom_bar;
 
     FloatingActionButton add_contact,add_btn,search_btn,delete_btn;
-
+    Button can_btn , del_btn;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment1, container, false);
         Bottom_bar = view.findViewById(R.id.bottom_bar);
-
+        can_btn =view.findViewById(R.id.button1);
+        del_btn =view.findViewById(R.id.button2);
         recyclerView = view.findViewById(R.id.contacts_recycler);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -140,6 +141,8 @@ public class Fragment_1 extends Fragment {
             public void onRefresh() {
                 swipeRefreshLayout.setRefreshing(true);
                 getContacts();
+                adapter.contactList = contactList;
+                adapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -149,11 +152,10 @@ public class Fragment_1 extends Fragment {
             @Override
             public void onItemLongClick(View v, int position) {
                 if (!adapter.display){
-                    //delete_list.add(position);
-                    //adapter.delete_list = delete_list;
+                    add_contact.setVisibility(View.INVISIBLE);
                     adapter.display = true;
-                    adapter.delete = position;
-                    adapter.delete_list.add(position);
+                    Bottom_bar.setVisibility(View.VISIBLE);
+                    adapter.delete_list.add(adapter.contactList.get(position).getId());
                     adapter.notifyDataSetChanged();
                 }
 
@@ -198,11 +200,11 @@ public class Fragment_1 extends Fragment {
                     v.getContext().startActivity(intent);
                 }
                 else{
-                    if (adapter.delete_list.contains(pos)){
-                        adapter.delete_list.remove(pos);
+                    if (adapter.delete_list.contains(adapter.contactList.get(pos).getId())){
+                        adapter.delete_list.remove(adapter.contactList.get(pos).getId());
                     }
                     else{
-                        adapter.delete_list.add(pos);
+                        adapter.delete_list.add(adapter.contactList.get(pos).getId());
                     }
                     adapter.notifyDataSetChanged();
                 }
@@ -223,7 +225,6 @@ public class Fragment_1 extends Fragment {
                 //change(name,phone,email,note,contactID);
             }
         });
-
         add_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -252,16 +253,40 @@ public class Fragment_1 extends Fragment {
                 searchView.setLayoutParams(layoutParams);
 
                 on_add_contact_clicked(view, ani_list);
+
+
             }
         });
         delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                add_contact.setVisibility(View.INVISIBLE);
                 adapter.display = true;
                 Bottom_bar.setVisibility(View.VISIBLE);
                 adapter.notifyDataSetChanged();
-                add_contact.setVisibility(View.INVISIBLE);
                 on_add_contact_clicked(view, ani_list);
+            }
+        });
+        can_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                adapter.display = false;
+                Bottom_bar.setVisibility(View.INVISIBLE);
+                add_contact.setVisibility(View.VISIBLE);
+                adapter.delete_list.clear();
+                adapter.notifyDataSetChanged();
+            }
+        });
+        del_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                adapter.display = false;
+                Bottom_bar.setVisibility(View.INVISIBLE);
+                add_contact.setVisibility(View.VISIBLE);
+                for (String element : adapter.delete_list) {
+                    delete(element);
+                }
+                adapter.notifyDataSetChanged();
             }
         });
         Dexter.withActivity(getActivity()).withPermission(Manifest.permission.READ_CONTACTS)
@@ -299,49 +324,37 @@ public class Fragment_1 extends Fragment {
             adapter.setFilteredList(filteredList);
         }
     }
-
+    public void delete(String id){
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        String where = ContactsContract.Data.CONTACT_ID + " = ? ";
+        String name_where_arg[] = new String[]{id};
+        contentResolver.delete(ContactsContract.Data.CONTENT_URI, where, name_where_arg);
+    }
     private void getContacts() {
         contactList.clear();
         Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 null,null,null,null);
         Set<String> ID_list = new HashSet<>();
         while (phones.moveToNext()){
-            String Id = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+            String Id = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
             if (!ID_list.contains(Id)){
 
-                String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                String phoneUri = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                String Email = get_email(phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
-                String Note = get_Note(phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
+                String name = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                String phoneNumber = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                String phoneUri = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
+                String Email = get_email(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
+                String Note = get_Note(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
 
                 //Contact contact = new Contact(name, phoneNumber,phoneUri, Email, Note, Id);
                 Contact contact = new Contact(name, phoneNumber,phoneUri, Email,Note, Id);
                 contactList.add(contact);
-                adapter.notifyDataSetChanged();
                 ID_list.add(Id);
+                adapter.notifyDataSetChanged();
             }
         }
 
         Collections.sort(contactList);
         adapter.notifyDataSetChanged();
-
-        /*
-        int size = contactList.size();
-
-        for(int i = 0 ; i < size ; i++){
-            if (i+1 == size){
-                break;
-            }
-            if (contactList.get(i).getPhone().equals(contactList.get(i+1).getPhone())){
-                size--;
-                contactList.remove(i);
-            }
-        }*/
-
-        //contactList.sort(contactList.spliterator().getComparator());
-        //contactList.sort(Collections.reverseOrder());
-        //adapter.notifyDataSetChanged();
     }
     private String get_email(String contact_id) {
         String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
@@ -350,7 +363,7 @@ public class Fragment_1 extends Fragment {
                 null,where,email_where_arg,null);
 
         if (email.moveToFirst()){
-            return  email.getString(email.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS));
+            return  email.getString(email.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.ADDRESS));
         }
         return null;
     }
@@ -361,7 +374,7 @@ public class Fragment_1 extends Fragment {
                 null,where,note_where_arg,null);
 
         if (note.moveToFirst()){
-            return  note.getString(note.getColumnIndex(ContactsContract.CommonDataKinds.Note.NOTE));
+            return  note.getString(note.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Note.NOTE));
         }
         return null;
     }
