@@ -25,7 +25,7 @@
 |![image](https://github.com/laddersky/mine/assets/89760088/477de31f-a92b-4888-b0b0-7d177ce58794)|![image](https://github.com/laddersky/mine/assets/89760088/d53ea76c-7bbd-4b95-a1d9-5a0957f0d285)|![image](https://github.com/laddersky/mine/assets/89760088/6249c1d3-3df5-4de2-afab-419193f233e4)|
 
 1. 내 갤러리 앱에 있는 모든 사진들을 보여줘요.
-2. 오늘 찍은 사진들은 "오늘" 뱃지를 갖고 있어요.
+2. 오늘 추가된 사진들은 "오늘" 뱃지를 갖고 있어요.
 3. 사진을 누르면 확대된 사진을 볼 수 있어요.
 
 ### 캘린더 탭
