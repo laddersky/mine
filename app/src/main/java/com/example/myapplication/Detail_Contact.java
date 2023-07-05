@@ -91,31 +91,23 @@ public class Detail_Contact extends AppCompatActivity {
                     Store(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
                             Note.getText().toString(),contactID);
                     Toast.makeText(view.getContext(),"저장 되었습니다.",Toast.LENGTH_LONG).show();
+                    setResult(9001,intent);
                     finish();
                 }
                 else{
                     Add(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
                             Note.getText().toString(),contactID);
                     Toast.makeText(view.getContext(),"추가 되었습니다.",Toast.LENGTH_LONG).show();
+                    setResult(9001,intent);
                     finish();
                 }
 
-                //setResult(9001,intent);
             }
         });
         back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                intent = new Intent(v.getContext(), Fragment_1.class);
-                //v.getContext().startActivity(intent);
-                intent.putExtra("name_data", Name.getText().toString());
-                intent.putExtra("phone_data", Phone.getText().toString());
-                intent.putExtra("email_data", Email.getText().toString());
-                intent.putExtra("note_data", Note.getText().toString());
-                intent.putExtra("id_data", contactID);
-                setResult(9001,intent);
                 finish();
-
             }
         });
 

@@ -122,12 +122,10 @@ public class Fragment_1 extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                getContacts();
-                adapter.contactList = contactList;
-                adapter.notifyDataSetChanged();
-                new Handler().postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
+                update();
             }
         });
+
 
 
         adapter.setOnItemClickListener(new ContactAdapter.OnItemLongClickListener() {
@@ -140,14 +138,6 @@ public class Fragment_1 extends Fragment {
                     adapter.delete_list.add(adapter.contactList.get(position).getId());
                     adapter.notifyDataSetChanged();
                 }
-
-                //adapter.delete(position);
-                //contactList..setImageResource(R.drawable.phone_number);
-                // 롱클릭된 아이템 처리
-                //contactList.get(position).setPhoto(String.valueOf(R.drawable.calendar));
-                //contactList.get(position).setPhoto();
-                //Photo.setImageResource(R.drawable.phone_number);
-                //Toast.makeText(getContext(), "선택된 아이템: " + selectedItem, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -195,19 +185,9 @@ public class Fragment_1 extends Fragment {
         });
         ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->{
             if (result.getResultCode() == 9001){
-                Intent intent = result.getData();
-                String name = intent.getStringExtra("name_data");
-                String email = intent.getStringExtra("email_data");
-                String phone = intent.getStringExtra("phone_data");
-                String note = intent.getStringExtra("note_data");
-                String contactID = intent.getStringExtra("id_data");
-
-                //Toast.makeText(getActivity(),name, Toast.LENGTH_SHORT).show();
-                //Toast.makeText(getActivity(),phone, Toast.LENGTH_SHORT).show();
-                //change(name,phone,email,note,contactID);
+                update();
             }
         });
-
         add_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -268,6 +248,7 @@ public class Fragment_1 extends Fragment {
                     delete(element);
                 }
                 adapter.notifyDataSetChanged();
+                update();
             }
         });
         Dexter.withActivity(getActivity()).withPermission(Manifest.permission.READ_CONTACTS)
@@ -307,6 +288,12 @@ public class Fragment_1 extends Fragment {
                     }
                 }).check();
         return view;
+    }
+    public void update(){
+        getContacts();
+        adapter.contactList = contactList;
+        adapter.notifyDataSetChanged();
+        new Handler().postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
     }
 
     private void filterList(String newText) {
