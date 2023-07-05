@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(viewPagerAdapter);
 
         // tabLayout에 아이콘 설정 부분
-        tabLayout.getTabAt(0).setIcon(R.drawable.phone_number);
+        tabLayout.getTabAt(0).setIcon(R.drawable.contact);
         tabLayout.getTabAt(1).setIcon(R.drawable.gallery);
         tabLayout.getTabAt(2).setIcon(R.drawable.calendar);
 
