@@ -32,6 +32,7 @@ public class ContactedPeopleAdapter extends RecyclerView.Adapter<ContactedPeople
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ContactedPerson item = contactedPeople.get(position);
         holder.nameTextView.setText(item.name);
+        holder.phoneNumberTextView.setText(item.phoneNumber);
         long duration = item.duration;
         int seconds = (int) (duration) % 60 ;
         int minutes = (int) ((duration / 60) % 60);
@@ -68,11 +69,13 @@ public class ContactedPeopleAdapter extends RecyclerView.Adapter<ContactedPeople
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView nameTextView;
+        private TextView phoneNumberTextView;
         private TextView durationTextView;
         public ViewHolder(View view) {
             super(view);
             nameTextView = view.findViewById(R.id.nameTextView);
             durationTextView = view.findViewById(R.id.durationTextView);
+            phoneNumberTextView = view.findViewById(R.id.phoneNumber);
         }
     }
 }

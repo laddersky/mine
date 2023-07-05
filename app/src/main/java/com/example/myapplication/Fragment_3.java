@@ -394,12 +394,14 @@ public class Fragment_3 extends Fragment {
         Cursor cursor = getActivity().getContentResolver().query(CallLog.Calls.CONTENT_URI, projection, selection, selectionArgs, CallLog.Calls.DATE + " ASC");
         int nameIndex = cursor.getColumnIndexOrThrow(CallLog.Calls.CACHED_NAME);
         int durationIndex = cursor.getColumnIndexOrThrow(CallLog.Calls.DURATION);
+        int numberIndex = cursor.getColumnIndexOrThrow(CallLog.Calls.NUMBER);
         ArrayList<ContactedPerson> contactedPeople = new ArrayList<>();
         while (cursor.moveToNext()) {
             boolean isExist = false;
             String name = cursor.getString(nameIndex);
             if (name == null) continue;
             long duration = cursor.getLong(durationIndex);
+            String phoneNumber = cursor.getString(numberIndex);
             for (int i = 0; i < contactedPeople.size(); i++) {
                 ContactedPerson item = contactedPeople.get(i);
                 if (item.getName().equals(name)) {
@@ -409,7 +411,7 @@ public class Fragment_3 extends Fragment {
                 }
             }
             if (!isExist) {
-                contactedPeople.add(new ContactedPerson(name, duration));
+                contactedPeople.add(new ContactedPerson(name, duration, phoneNumber));
             }
         }
         if (contactedPeople.size() != 0) {

@@ -5,9 +5,11 @@ import java.util.Comparator;
 public class ContactedPerson {
     String name;
     long duration;
-    public ContactedPerson(String name, long duration) {
+    String phoneNumber;
+    public ContactedPerson(String name, long duration, String phoneNumber) {
         this.name = name;
         this.duration = duration;
+        this.phoneNumber = phoneNumber;
     }
     String getName() {
         return this.name;
