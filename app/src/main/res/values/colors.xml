@@ -2,4 +2,8 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="orange">@android:color/holo_orange_light</color>
+    <color name="myColor3">@android:color/darker_gray</color>
+    <color name="itemBackgroundSelected">#e9e9e9</color>
+    <color name="itemBackgroundDefault">#ffffff</color>
 </resources>
