@@ -1,36 +1,10 @@
 package com.example.myapplication;
+
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.icu.text.Collator;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import android.os.Handler;
-import android.os.Looper;
-import android.os.RemoteException;
-import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -38,9 +12,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.widget.SearchView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.karumi.dexter.Dexter;
@@ -52,9 +34,7 @@ import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Currency;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -335,7 +315,12 @@ public class Fragment_1 extends Fragment {
         Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 null,null,null,null);
         Set<String> ID_list = new HashSet<>();
+        int idColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
+        int nameColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        int numberColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        int photoColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI);
         while (phones.moveToNext()){
+<<<<<<< HEAD
             String Id = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
             if (!ID_list.contains(Id)){
 
@@ -345,6 +330,15 @@ public class Fragment_1 extends Fragment {
                 String Email = get_email(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
                 String Note = get_Note(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
 
+=======
+            String Id = phones.getString(idColumnIndex);
+            if (!ID_list.contains(Id)){
+                String name = phones.getString(nameColumnIndex);
+                String phoneNumber = phones.getString(numberColumnIndex);
+                String phoneUri = phones.getString(photoColumnIndex);
+                String Email = get_email(Id);
+                String Note = get_Note(Id);
+>>>>>>> e90ffa69b0dc3b5929bf93a6ce7e3445dbe47aa3
                 //Contact contact = new Contact(name, phoneNumber,phoneUri, Email, Note, Id);
                 Contact contact = new Contact(name, phoneNumber,phoneUri, Email,Note, Id);
                 contactList.add(contact);

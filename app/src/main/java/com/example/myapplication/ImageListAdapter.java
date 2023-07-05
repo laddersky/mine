@@ -13,20 +13,29 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
     ArrayList<ImageItem> imageList;
     Context context;
+    int numPerRow;
+    boolean showNewBadge;
 
-    public ImageListAdapter(Context context) {
+    public ImageListAdapter(Context context, int numPerRow, boolean showNewBadge) {
         this.imageList = new ArrayList<>();
         this.context = context;
+        this.numPerRow = numPerRow;
+        this.showNewBadge = showNewBadge;
     }
 
     @NonNull
@@ -41,9 +50,8 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         ImageItem item = imageList.get(position);
         File file = new File(item.getPath());
         if (file.exists()) {
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            holder.imageView.setImageBitmap(bitmap);
-            holder.imageView.getLayoutParams().height =  context.getResources().getDisplayMetrics().widthPixels / 2;
+            Picasso.get().load(file).placeholder(R.drawable.placeholder_image).into(holder.imageView);
+            holder.imageView.getLayoutParams().height =  context.getResources().getDisplayMetrics().widthPixels / this.numPerRow;
             holder.imageView.setOnClickListener(view -> {
                 Dialog builder = new Dialog(context);
                 builder.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -51,6 +59,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
                         new ColorDrawable(android.graphics.Color.TRANSPARENT));
                 ImageView imageView = new ImageView(context);
                 int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
                 int width = bitmap.getWidth();
                 int height = bitmap.getHeight();
                 float aspectRatio = (float) width / height;
@@ -63,7 +72,29 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
                 builder.show();
             });
         }
+        if (this.showNewBadge) {
 
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(item.dateAdded * 1000);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            if (today.getTimeInMillis() == cal.getTimeInMillis()) {
+                holder.newBadge.setVisibility(View.VISIBLE);
+            }
+            else {
+                holder.newBadge.setVisibility(View.GONE);
+            }
+        }
+        else {
+            holder.newBadge.setVisibility(View.GONE);
+        }
     }
 
     public void addItem(ImageItem item) {
@@ -90,9 +121,11 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView imageView;
+        private TextView newBadge;
         public ViewHolder(View view) {
             super(view);
             imageView = view.findViewById(R.id.imageView);
+            newBadge = view.findViewById(R.id.newBadge);
         }
     }
 }

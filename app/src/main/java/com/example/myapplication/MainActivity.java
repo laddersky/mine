@@ -1,115 +1,73 @@
-/*package com.example.myapplication;
+package com.example.myapplication;
 
 import android.Manifest;
-import android.content.ContentProviderOperation;
-import android.content.OperationApplicationException;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.provider.ContactsContract;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import java.util.ArrayList;
-
-public class MainActivity extends AppCompatActivity {
-
-    private EditText editTextName, editTextNumber;
-
-    Button btn;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_contact_editor);
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.WRITE_CONTACTS},
-                PackageManager.PERMISSION_GRANTED);
-        editTextName = findViewById(R.id.name_edit_text);
-        editTextNumber = findViewById(R.id.number_edit_text);
-        //btn = findViewById(R.id.save_button);
-
-    }
-    public void buttonUpdateContact(View view){
-
-        ArrayList<ContentProviderOperation> contentProviderOperations
-                = new ArrayList<ContentProviderOperation>();
-
-        contentProviderOperations.add(ContentProviderOperation
-                .newUpdate(ContactsContract.Data.CONTENT_URI)
-                .withSelection(ContactsContract.Data.DISPLAY_NAME + " = ? AND " +
-                        ContactsContract.Data.MIMETYPE + " = ?",
-                        new String[]{editTextName.getText().toString(),
-                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE})
-                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER,
-                        editTextNumber.getText().toString())
-                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
-                        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
-                .build());
-        try {
-            getContentResolver().applyBatch(ContactsContract.AUTHORITY,contentProviderOperations);
-            Toast.makeText(this,"success",Toast.LENGTH_LONG).show();
-
-        }
-        catch (OperationApplicationException e){
-            e.printStackTrace();
-        }
-        catch (RemoteException e){
-            e.printStackTrace();
-        }
-    }
-}
-*/
-
-package com.example.myapplication;
 import android.annotation.SuppressLint;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.PagerAdapter;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
-
-import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.tabs.TabLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
-
-    private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
-
-    private Fragment_1 firstFragment;
-    private Fragment_2 secondFragment;
-    private Fragment_3 thirdFragment;
-
+    TabLayout tabLayout;
+    ViewPager viewPager;
+    Fragment_1 firstFragment;
+    Fragment_2 secondFragment;
+    Fragment_3 thirdFragment;
+    PermissionViewModel permissionViewModel;
+    String[] permissions = {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? Manifest.permission.READ_MEDIA_IMAGES : Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_CALENDAR,
+            Manifest.permission.READ_CALL_LOG
+    };
+    ActivityResultLauncher<String[]> permissionsLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), result -> {
+        Boolean galleryAccepted = result.get(permissions[0]);
+        if (galleryAccepted != null && galleryAccepted) {
+            permissionViewModel.getIsGalleryAccepted().postValue(true);
+        }
+        Boolean calendarAccepted = result.get(permissions[1]);
+        if (calendarAccepted != null && calendarAccepted) {
+            permissionViewModel.getIsCalendarAccepted().postValue(true);
+        }
+        Boolean callLogAccepted = result.get(permissions[2]);
+        if (callLogAccepted != null && callLogAccepted) {
+            permissionViewModel.getIsCallLogAccepted().postValue(true);
+        }
+    });
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        permissionViewModel = new ViewModelProvider(this).get(PermissionViewModel.class);
 
         // toolbar 설정
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("몰입캠프");
-        toolbar.setTitleTextColor(  Color.BLACK);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setTitle("몰입캠프");
-        //getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setTitle("몰입캠프");
 
         // ViewPager 설정
         viewPager = findViewById(R.id.view_pager);
@@ -118,8 +76,7 @@ public class MainActivity extends AppCompatActivity {
         // tabLayout에 ViewPager 연결
         tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
-        tabLayout.setTabTextColors(ColorStateList.valueOf(Color.BLACK));
-        //tabLayout.setInlineLabelResource(R.drawable.mollibcamp);
+
         // Fragment 생성
         firstFragment = new Fragment_1();
         secondFragment = new Fragment_2();
@@ -133,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(viewPagerAdapter);
 
         // tabLayout에 아이콘 설정 부분
-        tabLayout.getTabAt(0).setIcon(R.drawable.phone_number);
+        tabLayout.getTabAt(0).setIcon(R.drawable.contact);
         tabLayout.getTabAt(1).setIcon(R.drawable.gallery);
         tabLayout.getTabAt(2).setIcon(R.drawable.calendar);
 
@@ -142,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
         //BadgeDrawable badgeDrawable = tabLayout.getTabAt(2).getOrCreateBadge();
         //badgeDrawable.setVisible(true);
         //badgeDrawable.setNumber(7);
+        checkPermissions();
     }
     @Override
     public void onBackPressed() {
@@ -182,5 +140,33 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    private void checkPermissions() {
+        List<String> requestPermissions = new ArrayList<>();
+        for (int i = 0; i < permissions.length; i++) {
+            if (ContextCompat.checkSelfPermission(this, permissions[i]) == PackageManager.PERMISSION_GRANTED) {
+                Log.d("main activity", "permission accepted " + i);
+                onPermissionAccepted(i);
+            }
+            else {
+                onPermissionDenied(i);
+                requestPermissions.add(permissions[i]);
+            }
+        }
+        permissionsLauncher.launch(requestPermissions.toArray(new String[requestPermissions.size()]));
+    }
 
+    private void onPermissionAccepted(int index) {
+        switch (index) {
+            case 0: permissionViewModel.getIsGalleryAccepted().postValue(true);
+            case 1: permissionViewModel.getIsCalendarAccepted().postValue(true);
+            case 2: permissionViewModel.getIsCallLogAccepted().postValue(true);
+        }
+    }
+    private void onPermissionDenied(int index) {
+        switch (index) {
+            case 0: permissionViewModel.getIsGalleryAccepted().postValue(false);
+            case 1: permissionViewModel.getIsCalendarAccepted().postValue(false);
+            case 2: permissionViewModel.getIsCallLogAccepted().postValue(false);
+        }
+    }
 }
