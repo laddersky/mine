@@ -154,7 +154,7 @@ public class Fragment_3 extends Fragment {
         calendar.setOnDateChangedListener((widget, date, selected) -> {
             if (date.getDate().getTime() > minMaxDecorator.getMaxDay().getDate().getTime()) {
                 linearLayout.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "미래의 한줄 기록은 작성할 수 없어요", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "미래의 하루는 기록할 수 없어요", Toast.LENGTH_SHORT).show();
             }
             else {
                 linearLayout.setVisibility(View.VISIBLE);
