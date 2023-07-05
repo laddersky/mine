@@ -11,7 +11,6 @@
         android:id="@+id/constrain_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background"
         android:orientation="vertical"
         tools:context=".MainActivity">
 
@@ -27,7 +26,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:queryHint="Search Here ...." />
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/contacts_recycler"
             android:layout_width="0dp"
@@ -38,8 +36,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/search_view"
 
-            app:layout_constraintTop_toBottomOf="@+id/search_view" />
+            />
 
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -113,8 +112,8 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_weight="1"
-                android:text="Button 1"
-                android:textColor="@color/textColor" />
+                android:textColor="@color/textColor"
+                android:text="취소" />
 
             <!-- 우측 버튼 -->
             <Button
@@ -123,8 +122,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="8dp"
                 android:layout_weight="1"
-                android:text="Button 2"
-                android:textColor="@color/textColor" />
+                android:textColor="@color/textColor"
+                android:text="삭제" />
 
         </LinearLayout>
 
