@@ -1,31 +1,27 @@
 package com.example.myapplication;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.w3c.dom.Text;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
 
@@ -33,85 +29,82 @@ public class Fragment_2 extends Fragment {
     private ImageListAdapter adapter;
     private int SIZE = 10;
     private Cursor cursor;
-    ActivityResultLauncher<String> galleryResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
-        @Override
-        public void onActivityResult(Boolean result) {
-            if (result) {
-                onPermissionAccepted(null);
-            }
-            else {
-                Toast.makeText(getContext(),  "설정에서 접근 권한을 허용해주세요.", Toast.LENGTH_SHORT).show();
-            }
+    ActivityResultLauncher<String> galleryResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), result -> {
+        if (result) {
+            onPermissionAccepted(null);
+        }
+        else {
+            Toast.makeText(getContext(),  "저장공간 접근 권한을 허용해주세요.", Toast.LENGTH_SHORT).show();
         }
     });
 
     public Fragment_2() {
-        Log.d("fragment2", "created");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment2, container, false);
-        adapter = new ImageListAdapter(getContext());
-        checkPermission(view);
+        adapter = new ImageListAdapter(getContext(), 2);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
-        RecyclerView gallery = (RecyclerView)view.findViewById(R.id.gallery);
+        RecyclerView gallery = view.findViewById(R.id.gallery);
         gallery.setLayoutManager(layoutManager);
         gallery.addItemDecoration(new ImageItemDecoration());
         gallery.setAdapter(adapter);
-        gallery.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
-                if(!view.canScrollVertically(1)) {
-                    loadMore();
-                }
+        gallery.setOnScrollChangeListener((view1, i, i1, i2, i3) -> {
+            if(!view1.canScrollVertically(1)) {
+                loadMore();
             }
         });
-        Button button = (Button) view.findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                galleryResultLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+        Button button = view.findViewById(R.id.button);
+        button.setOnClickListener(view12 -> {
+            String permission;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permission = Manifest.permission.READ_MEDIA_IMAGES;
             }
+            else {
+                permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+            }
+            galleryResultLauncher.launch(permission);
         });
 
-
+        SwipeRefreshLayout swipeRefreshLayout = view.findViewById(R.id.refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            adapter.setImageList(getInitialImagePaths());
+            new Handler().postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
+        });
 
         return view;
     }
 
-    private void checkPermission(View view) {
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
-        == PackageManager.PERMISSION_GRANTED) {
-            onPermissionAccepted(view);
-        }
-        else if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            Toast.makeText(getContext(), "저장공간 접근 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
-        }
-        else {
-            galleryResultLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        PermissionViewModel permissionViewModel = new ViewModelProvider(getActivity()).get(PermissionViewModel.class);
+        permissionViewModel.getIsGalleryAccepted().observe(getViewLifecycleOwner(), aBoolean -> {
+            if (aBoolean) {
+                onPermissionAccepted(view);
+            }
+        });
     }
 
     private void onPermissionAccepted(View view) {
         Button button;
-        //TextView textView;
         if (view == null) {
-            button = (Button) getView().findViewById(R.id.button);
+            button = getView().findViewById(R.id.button);
         }
         else {
-            button = (Button) view.findViewById(R.id.button);
+            button = view.findViewById(R.id.button);
         }
         button.setVisibility(View.INVISIBLE);
-        setImageListToAdapter(getInitialImagePaths());
+        adapter.setImageList(getInitialImagePaths());
     }
 
     private void loadMore() {
         int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         int cnt = 0;
         int positionStart = adapter.getItemCount();
-        while (cursor.moveToNext() && cnt < SIZE) {
+        while (cnt < SIZE && cursor.moveToNext()) {
             String imagePath = cursor.getString(columnIndexData);
             adapter.addItem(new ImageItem(imagePath));
             cnt++;
@@ -122,20 +115,15 @@ public class Fragment_2 extends Fragment {
 
     private ArrayList<ImageItem> getInitialImagePaths() {
         ArrayList<ImageItem> imageList = new ArrayList<>();
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media.DATE_TAKEN};
-        cursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media.DATE_TAKEN + " DESC");
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media._ID};
+        cursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media._ID + " DESC");
         int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         int cnt = 0;
-        while (cursor.moveToNext() && cnt < SIZE) {
+        while (cnt < SIZE && cursor.moveToNext()) {
             String imagePath = cursor.getString(columnIndexData);
             imageList.add(new ImageItem(imagePath));
             cnt++;
-            // Log.d("path", imagePath);
         }
         return imageList;
-    }
-
-    private void setImageListToAdapter(ArrayList<ImageItem> imageList) {
-        adapter.setImageList(imageList);
     }
 }
