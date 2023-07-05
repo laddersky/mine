@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         // toolbar 설정
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("몰입캠프");
+        getSupportActionBar().setTitle("Daylog");
 
         // ViewPager 설정
         viewPager = findViewById(R.id.view_pager);
