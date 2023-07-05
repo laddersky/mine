@@ -1,6 +1,7 @@
 package com.example.myapplication;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -119,11 +120,10 @@ public class Fragment_1 extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                swipeRefreshLayout.setRefreshing(true);
                 getContacts();
                 adapter.contactList = contactList;
                 adapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
+                new Handler().postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
             }
         });
 
@@ -205,6 +205,7 @@ public class Fragment_1 extends Fragment {
                 //change(name,phone,email,note,contactID);
             }
         });
+
         add_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -233,8 +234,6 @@ public class Fragment_1 extends Fragment {
                 searchView.setLayoutParams(layoutParams);
 
                 on_add_contact_clicked(view, ani_list);
-
-
             }
         });
         delete_btn.setOnClickListener(new View.OnClickListener() {
@@ -315,40 +314,24 @@ public class Fragment_1 extends Fragment {
         Cursor phones = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                 null,null,null,null);
         Set<String> ID_list = new HashSet<>();
-        int idColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID);
-        int nameColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-        int numberColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        int photoColumnIndex = phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI);
-        while (phones.moveToNext()){
-<<<<<<< HEAD
+        while (phones.moveToNext()) {
             String Id = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
-            if (!ID_list.contains(Id)){
-
+            if (!ID_list.contains(Id)) {
                 String name = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
                 String phoneNumber = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 String phoneUri = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
                 String Email = get_email(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
                 String Note = get_Note(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
-
-=======
-            String Id = phones.getString(idColumnIndex);
-            if (!ID_list.contains(Id)){
-                String name = phones.getString(nameColumnIndex);
-                String phoneNumber = phones.getString(numberColumnIndex);
-                String phoneUri = phones.getString(photoColumnIndex);
-                String Email = get_email(Id);
-                String Note = get_Note(Id);
->>>>>>> e90ffa69b0dc3b5929bf93a6ce7e3445dbe47aa3
-                //Contact contact = new Contact(name, phoneNumber,phoneUri, Email, Note, Id);
-                Contact contact = new Contact(name, phoneNumber,phoneUri, Email,Note, Id);
+                Contact contact = new Contact(name, phoneNumber, phoneUri, Email, Note, Id);
                 contactList.add(contact);
                 ID_list.add(Id);
                 adapter.notifyDataSetChanged();
+                ID_list.add(Id);
             }
-        }
 
-        Collections.sort(contactList);
-        adapter.notifyDataSetChanged();
+            Collections.sort(contactList);
+            adapter.notifyDataSetChanged();
+        }
     }
     private String get_email(String contact_id) {
         String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
