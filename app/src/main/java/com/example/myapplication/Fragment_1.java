@@ -138,9 +138,8 @@ public class Fragment_1 extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                swipeRefreshLayout.setRefreshing(true);
                 getContacts();
-                swipeRefreshLayout.setRefreshing(false);
+                new Handler().postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
             }
         });
 
@@ -251,6 +250,7 @@ public class Fragment_1 extends Fragment {
                 layoutParams.height = ConstraintLayout.LayoutParams.WRAP_CONTENT;
                 searchView.setLayoutParams(layoutParams);
 
+
                 on_add_contact_clicked(view, ani_list);
             }
         });
@@ -306,14 +306,14 @@ public class Fragment_1 extends Fragment {
                 null,null,null,null);
         Set<String> ID_list = new HashSet<>();
         while (phones.moveToNext()){
-            String Id = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
+            String Id = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID));
             if (!ID_list.contains(Id)){
 
-                String name = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-                String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                String phoneUri = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
-                String Email = get_email(phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
-                String Note = get_Note(phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
+                String name = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                String phoneNumber = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                String phoneUri = phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.PHOTO_URI));
+                String Email = get_email(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
+                String Note = get_Note(phones.getString(phones.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
 
                 //Contact contact = new Contact(name, phoneNumber,phoneUri, Email, Note, Id);
                 Contact contact = new Contact(name, phoneNumber,phoneUri, Email,Note, Id);
@@ -350,7 +350,7 @@ public class Fragment_1 extends Fragment {
                 null,where,email_where_arg,null);
 
         if (email.moveToFirst()){
-            return  email.getString(email.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS));
+            return  email.getString(email.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Email.ADDRESS));
         }
         return null;
     }
@@ -361,7 +361,7 @@ public class Fragment_1 extends Fragment {
                 null,where,note_where_arg,null);
 
         if (note.moveToFirst()){
-            return  note.getString(note.getColumnIndex(ContactsContract.CommonDataKinds.Note.NOTE));
+            return  note.getString(note.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.Note.NOTE));
         }
         return null;
     }

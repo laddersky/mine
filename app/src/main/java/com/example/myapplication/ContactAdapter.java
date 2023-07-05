@@ -111,17 +111,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         if(contact.getPhoto() != null){
             Picasso.get().load(contact.getPhoto()).into(holder.img_contact);
         } else{
-            holder.img_contact.setImageResource(R.drawable.phone_number);
+            holder.img_contact.setImageResource(R.drawable.profile);
         }
         holder.display();
         if (display){
             if (delete_list.contains(position)){
                 holder.check_box.setImageResource(R.drawable.baseline_check_box_24);
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.itemBackgroundSelected));
             }
             else{
                 holder.check_box.setImageResource(R.drawable.baseline_crop_square_24);
-                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.itemBackgroundDefault));
             }
         }
 
