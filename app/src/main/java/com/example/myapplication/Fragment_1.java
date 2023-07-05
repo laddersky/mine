@@ -104,14 +104,14 @@ public class Fragment_1 extends Fragment {
                 return true;
             }
         });
-        searchView.setVisibility(View.INVISIBLE);
+        searchView.setVisibility(View.GONE);
         view.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
                 Toast.makeText(getContext(),"Tlqkf",Toast.LENGTH_SHORT).show();
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     // 뒤로가기 버튼이 눌렸을 때의 동작 처리
-                    searchView.setVisibility(View.INVISIBLE);
+                    searchView.setVisibility(View.GONE);
                     return true;
                 }
                 return false;
@@ -134,7 +134,7 @@ public class Fragment_1 extends Fragment {
             @Override
             public void onItemLongClick(View v, int position) {
                 if (!adapter.display){
-                    add_contact.setVisibility(View.INVISIBLE);
+                    add_contact.setVisibility(View.GONE);
                     adapter.display = true;
                     Bottom_bar.setVisibility(View.VISIBLE);
                     adapter.delete_list.add(adapter.contactList.get(position).getId());
@@ -241,7 +241,7 @@ public class Fragment_1 extends Fragment {
         delete_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                add_contact.setVisibility(View.INVISIBLE);
+                add_contact.setVisibility(View.GONE);
                 adapter.display = true;
                 Bottom_bar.setVisibility(View.VISIBLE);
                 adapter.notifyDataSetChanged();
@@ -252,7 +252,7 @@ public class Fragment_1 extends Fragment {
             @Override
             public void onClick(View view) {
                 adapter.display = false;
-                Bottom_bar.setVisibility(View.INVISIBLE);
+                Bottom_bar.setVisibility(View.GONE);
                 add_contact.setVisibility(View.VISIBLE);
                 adapter.delete_list.clear();
                 adapter.notifyDataSetChanged();
@@ -262,7 +262,7 @@ public class Fragment_1 extends Fragment {
             @Override
             public void onClick(View view) {
                 adapter.display = false;
-                Bottom_bar.setVisibility(View.INVISIBLE);
+                Bottom_bar.setVisibility(View.GONE);
                 add_contact.setVisibility(View.VISIBLE);
                 for (String element : adapter.delete_list) {
                     delete(element);
@@ -275,6 +275,24 @@ public class Fragment_1 extends Fragment {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
                         if (response.getPermissionName().equals(Manifest.permission.READ_CONTACTS)){
+                            getContacts();
+                        }
+                    }
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        Toast.makeText(getActivity(),"Permission should be granted", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+        Dexter.withActivity(getActivity()).withPermission(Manifest.permission.WRITE_CONTACTS)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        if (response.getPermissionName().equals(Manifest.permission.WRITE_CONTACTS)){
                             getContacts();
                         }
                     }
@@ -369,9 +387,9 @@ public class Fragment_1 extends Fragment {
             delete_btn.setVisibility(view.VISIBLE);
         }
         else{
-            add_btn.setVisibility(view.INVISIBLE);
-            search_btn.setVisibility(view.INVISIBLE);
-            delete_btn.setVisibility(view.INVISIBLE);
+            add_btn.setVisibility(view.GONE);
+            search_btn.setVisibility(view.GONE);
+            delete_btn.setVisibility(view.GONE);
         }
     }
     private void setAimation(View view, Boolean clicked , Animation[] ani_list){
