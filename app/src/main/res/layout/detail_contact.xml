@@ -53,7 +53,7 @@
             android:layout_height="120dp"
             android:layout_alignParentTop="false"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/phone_number"
+            android:src="@drawable/profile"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -117,7 +117,6 @@
             android:layout_marginEnd="8dp"
             android:background="@color/colorDateSelection"
             android:hint="메모"
-            android:inputType="textPostalAddress"
             android:padding="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

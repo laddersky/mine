@@ -149,7 +149,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             }
             else{
                 check_box.setVisibility(View.INVISIBLE);
-                itemview.setBackgroundColor(ContextCompat.getColor(itemview.getContext(), R.color.itemBackgroundDefault));
                 delete_list.clear();
             }
         }
