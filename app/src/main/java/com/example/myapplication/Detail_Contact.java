@@ -90,10 +90,14 @@ public class Detail_Contact extends AppCompatActivity {
                 if (!Is_add){
                     Store(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
                             Note.getText().toString(),contactID);
+                    Toast.makeText(view.getContext(),"저장 되었습니다.",Toast.LENGTH_LONG).show();
+                    finish();
                 }
                 else{
                     Add(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
                             Note.getText().toString(),contactID);
+                    Toast.makeText(view.getContext(),"추가 되었습니다.",Toast.LENGTH_LONG).show();
+                    finish();
                 }
 
                 //setResult(9001,intent);
