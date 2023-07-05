@@ -88,18 +88,29 @@ public class Detail_Contact extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!Is_add){
-                    Store(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
-                            Note.getText().toString(),contactID);
-                    Toast.makeText(view.getContext(),"저장 되었습니다.",Toast.LENGTH_LONG).show();
-                    setResult(9001,intent);
-                    finish();
+                    if (Name.getText().toString().length() != 0){
+                        Store(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
+                                Note.getText().toString(),contactID);
+                        Toast.makeText(view.getContext(),"저장 되었습니다.",Toast.LENGTH_LONG).show();
+                        setResult(9001,intent);
+                        finish();
+                    }
+                    else{
+                        Toast.makeText(view.getContext(),"이름을 지어주세요.",Toast.LENGTH_LONG).show();
+                    }
+
                 }
                 else{
-                    Add(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
-                            Note.getText().toString(),contactID);
-                    Toast.makeText(view.getContext(),"추가 되었습니다.",Toast.LENGTH_LONG).show();
-                    setResult(9001,intent);
-                    finish();
+                    if (Name.getText().toString().length() != 0) {
+                        Add(Name.getText().toString(), Phone.getText().toString(), Email.getText().toString(),
+                                Note.getText().toString(), contactID);
+                        Toast.makeText(view.getContext(), "추가 되었습니다.", Toast.LENGTH_LONG).show();
+                        setResult(9001, intent);
+                        finish();
+                    }
+                    else{
+                        Toast.makeText(view.getContext(),"이름을 지어주세요.",Toast.LENGTH_LONG).show();
+                    }
                 }
 
             }

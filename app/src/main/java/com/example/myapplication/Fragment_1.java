@@ -142,34 +142,39 @@ public class Fragment_1 extends Fragment {
         });
 
         recyclerView.setAdapter(adapter);
+        ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->{
+            if (result.getResultCode() == 9001){
+                update();
+            }
+        });
         adapter.setOnItemClickListener(new ContactAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int pos) {
                 if (!adapter.display ){
                     intent = new Intent(v.getContext(), Detail_Contact.class);
-                    //v.getContext().startActivity(intent);
                     intent.putExtra("add", false);
-                    if (contactList.get(pos).getName() != null){
-                        intent.putExtra("name", contactList.get(pos).getName());
+                    if (adapter.contactList.get(pos).getName() != null){
+                        intent.putExtra("name", adapter.contactList.get(pos).getName());
                         //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
                     }
-                    if (contactList.get(pos).getPhone() != null){
-                        intent.putExtra("phone_number", contactList.get(pos).getPhone());
+                    if (adapter.contactList.get(pos).getPhone() != null){
+                        intent.putExtra("phone_number", adapter.contactList.get(pos).getPhone());
                         //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
                     }
-                    if (contactList.get(pos).getPhoto() != null){
-                        intent.putExtra("photo", contactList.get(pos).getPhoto());
+                    if (adapter.contactList.get(pos).getPhoto() != null){
+                        intent.putExtra("photo", adapter.contactList.get(pos).getPhoto());
                         //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
                     }
-                    intent.putExtra("id", contactList.get(pos).getId());
-                    if (contactList.get(pos).getEmail() != null){
-                        intent.putExtra("email",contactList.get(pos).getEmail());
+                    intent.putExtra("id", adapter.contactList.get(pos).getId());
+                    if (adapter.contactList.get(pos).getEmail() != null){
+                        intent.putExtra("email",adapter.contactList.get(pos).getEmail());
                         //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
                     }
-                    if (contactList.get(pos).getNote() != null){
-                        intent.putExtra("note",contactList.get(pos).getNote());
+                    if (adapter.contactList.get(pos).getNote() != null){
+                        intent.putExtra("note",adapter.contactList.get(pos).getNote());
                     }
-                    v.getContext().startActivity(intent);
+                    activityResultLauncher.launch(intent);
+
                 }
                 else{
                     if (adapter.delete_list.contains(adapter.contactList.get(pos).getId())){
@@ -183,11 +188,7 @@ public class Fragment_1 extends Fragment {
 
             }
         });
-        ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->{
-            if (result.getResultCode() == 9001){
-                update();
-            }
-        });
+
         add_contact.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
