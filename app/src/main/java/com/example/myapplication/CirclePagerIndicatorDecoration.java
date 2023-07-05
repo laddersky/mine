@@ -1,5 +1,6 @@
 package com.example.myapplication;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -19,8 +20,10 @@ public class CirclePagerIndicatorDecoration extends RecyclerView.ItemDecoration 
     private final float indicatorItemLength = DP * 4;
     private final float indicatorItemPadding = DP * 8;
     private final Paint paint = new Paint();
+    Context context;
 
-    public CirclePagerIndicatorDecoration() {
+    public CirclePagerIndicatorDecoration(Context context) {
+        this.context = context;
         paint.setStrokeWidth(indicatorStrokeWidth);
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
@@ -48,7 +51,7 @@ public class CirclePagerIndicatorDecoration extends RecyclerView.ItemDecoration 
         final float itemWidth = indicatorItemLength + indicatorItemPadding;
         float start = indicatorStartX;
         int colorInactive = Color.GRAY;
-        int colorActive = Color.BLACK;
+        int colorActive = context.getColor(R.color.colorPrimary);
         for (int i = 0; i < itemCount; i++) {
             if (i == position) {
                 paint.setColor(colorActive);

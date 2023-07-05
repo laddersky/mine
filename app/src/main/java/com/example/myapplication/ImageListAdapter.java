@@ -17,6 +17,8 @@ import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -43,8 +45,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         ImageItem item = imageList.get(position);
         File file = new File(item.getPath());
         if (file.exists()) {
-            Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-            holder.imageView.setImageBitmap(bitmap);
+            Picasso.get().load(file).placeholder(R.drawable.placeholder_image).into(holder.imageView);
             holder.imageView.getLayoutParams().height =  context.getResources().getDisplayMetrics().widthPixels / this.numPerRow;
             holder.imageView.setOnClickListener(view -> {
                 Dialog builder = new Dialog(context);
@@ -53,6 +54,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
                         new ColorDrawable(android.graphics.Color.TRANSPARENT));
                 ImageView imageView = new ImageView(context);
                 int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
                 int width = bitmap.getWidth();
                 int height = bitmap.getHeight();
                 float aspectRatio = (float) width / height;
