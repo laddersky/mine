@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     SearchView searchView = fragmentView.findViewById(R.id.search_view);
                     if (searchView.getVisibility() == View.VISIBLE){
                         searchView.setQuery("", false);
-                        searchView.setVisibility(View.INVISIBLE);
+                        searchView.setVisibility(View.GONE);
                         ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) searchView.getLayoutParams();
                         layoutParams.height = 0;
                         searchView.setLayoutParams(layoutParams);
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
                     //이부분 추가
                     LinearLayout bottom_bar = fragmentView.findViewById(R.id.bottom_bar);
                     if (bottom_bar.getVisibility() == View.VISIBLE){
-                        bottom_bar.setVisibility(View.INVISIBLE);
+                        bottom_bar.setVisibility(View.GONE);
 
                         fragment1.adapter.display = false;
                         fragment1.add_contact.setVisibility(View.VISIBLE);
