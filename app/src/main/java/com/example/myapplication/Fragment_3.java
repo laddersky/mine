@@ -129,7 +129,6 @@ public class Fragment_3 extends Fragment {
         MaterialCalendarView calendar = view.findViewById(R.id.calendar);
         LinearLayout linearLayout = view.findViewById(R.id.linearLayout);
         calendar.setSelectedDate(todayCalendarDay);
-        calendar.setSelectionColor(getContext().getColor(R.color.colorDateSelection));
         calendar.state().edit()
                 .isCacheCalendarPositionEnabled(false)
                 .setFirstDayOfWeek(Calendar.SUNDAY)
