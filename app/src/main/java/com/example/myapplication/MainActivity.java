@@ -5,17 +5,23 @@ import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 import android.util.Log;
 
+import androidx.appcompat.widget.SearchView;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.PagerAdapter;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
@@ -25,6 +31,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    TabLayout tabLayout;
+    ViewPager viewPager;
+    Fragment_1 firstFragment;
+    Fragment_2 secondFragment;
+    Fragment_3 thirdFragment;
     PermissionViewModel permissionViewModel;
     String[] permissions = {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ? Manifest.permission.READ_MEDIA_IMAGES : Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -58,17 +69,17 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("몰입캠프");
 
         // ViewPager 설정
-        ViewPager viewPager = findViewById(R.id.view_pager);
+        viewPager = findViewById(R.id.view_pager);
         viewPager.setOffscreenPageLimit(3); //페이지 유지 개수
 
         // tabLayout에 ViewPager 연결
-        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        tabLayout = findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
 
         // Fragment 생성
-        Fragment_1 firstFragment = new Fragment_1();
-        Fragment_2 secondFragment = new Fragment_2();
-        Fragment_3 thirdFragment = new Fragment_3();
+        firstFragment = new Fragment_1();
+        secondFragment = new Fragment_2();
+        thirdFragment = new Fragment_3();
 
         // ViewPagerAdapter를 이용하여 Fragment 연결
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
@@ -88,6 +99,32 @@ public class MainActivity extends AppCompatActivity {
         //badgeDrawable.setVisible(true);
         //badgeDrawable.setNumber(7);
         checkPermissions();
+    }
+    @Override
+    public void onBackPressed() {
+        int currentItem = viewPager.getCurrentItem();
+        PagerAdapter adapter = viewPager.getAdapter();
+        if (adapter instanceof ViewPagerAdapter) {
+            ViewPagerAdapter viewPagerAdapter = (ViewPagerAdapter) adapter;
+            Fragment currentFragment = viewPagerAdapter.getItem(currentItem);
+            if (currentFragment instanceof Fragment_1) {
+                Fragment_1 fragment1 = (Fragment_1) currentFragment;
+                View fragmentView = fragment1.getView();
+                if (fragmentView != null) {
+                    SearchView searchView = fragmentView.findViewById(R.id.search_view);
+                    if (searchView.getVisibility() == View.VISIBLE){
+                        searchView.setQuery("", false);
+                        searchView.setVisibility(View.INVISIBLE);
+                        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) searchView.getLayoutParams();
+                        layoutParams.height = 0;
+                        searchView.setLayoutParams(layoutParams);
+                        return;
+                    }
+                    // searchView를 사용하여 활성화 여부 판단 및 로직 수행
+                }
+            }
+        }
+        super.onBackPressed();
     }
 
     private void checkPermissions() {
