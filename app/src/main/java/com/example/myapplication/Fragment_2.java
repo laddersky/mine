@@ -45,7 +45,7 @@ public class Fragment_2 extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment2, container, false);
-        adapter = new ImageListAdapter(getContext(), 2);
+        adapter = new ImageListAdapter(getContext(), 2, true);
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
         RecyclerView gallery = view.findViewById(R.id.gallery);
         gallery.setLayoutManager(layoutManager);
@@ -101,12 +101,14 @@ public class Fragment_2 extends Fragment {
     }
 
     private void loadMore() {
-        int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        int dataColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        int dateAddedColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);
         int cnt = 0;
         int positionStart = adapter.getItemCount();
         while (cnt < SIZE && cursor.moveToNext()) {
-            String imagePath = cursor.getString(columnIndexData);
-            adapter.addItem(new ImageItem(imagePath));
+            String imagePath = cursor.getString(dataColumnIndex);
+            long time = cursor.getLong(dateAddedColumnIndex);
+            adapter.addItem(new ImageItem(imagePath, time));
             cnt++;
             Log.d("path", imagePath);
         }
@@ -115,13 +117,15 @@ public class Fragment_2 extends Fragment {
 
     private ArrayList<ImageItem> getInitialImagePaths() {
         ArrayList<ImageItem> imageList = new ArrayList<>();
-        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media._ID};
+        String[] projection = {MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME, MediaStore.Images.Media._ID, MediaStore.Images.Media.DATE_ADDED};
         cursor = getActivity().getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media._ID + " DESC");
-        int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        int dataColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        int dateAddedColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED);
         int cnt = 0;
         while (cnt < SIZE && cursor.moveToNext()) {
-            String imagePath = cursor.getString(columnIndexData);
-            imageList.add(new ImageItem(imagePath));
+            String imagePath = cursor.getString(dataColumnIndex);
+            long dateAdded = cursor.getLong(dateAddedColumnIndex);
+            imageList.add(new ImageItem(imagePath, dateAdded));
             cnt++;
         }
         return imageList;
