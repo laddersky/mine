@@ -9,7 +9,6 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import java.util.ArrayList;
 
 public class ViewPagerAdapter extends FragmentStatePagerAdapter {
-
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
     private ArrayList<String> fragmentTitle = new ArrayList<>();
 
@@ -20,6 +19,7 @@ public class ViewPagerAdapter extends FragmentStatePagerAdapter {
     @NonNull
     @Override   // 화면의 실제 Fragment를 반환한다.
     public Fragment getItem(int position) {
+
         return fragmentList.get(position);
     }
 
