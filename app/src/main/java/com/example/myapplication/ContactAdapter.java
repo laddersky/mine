@@ -18,6 +18,7 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.menu.MenuView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -36,8 +37,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     private Intent intent;
     List<Contact> contactList;
     boolean display = false;
-    public Set<Integer> delete_list = new HashSet<Integer>() {};
-    public int delete;
+    public Set<String> delete_list = new HashSet<String>() {};
     View this_view;
     public boolean isImageChanged = false;
     private OnItemClickListener mListener = null;
@@ -54,32 +54,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
     }
-
-    public void mode_off() {
-        //check_box.setVisibility(View.INVISIBLE);
-
-        /*
-        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) check_box.getLayoutParams();
-        layoutParams.height = 0;
-        layoutParams.width = 0;
-        check_box.setLayoutParams(layoutParams);*/
-
-    }
-
-    public void mode_on() {
-        ImageView check_box = this_view.findViewById(R.id.imageView2);
-
-        check_box.setVisibility(View.VISIBLE);
-        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) check_box.getLayoutParams();
-        int heightInDp = 30;
-        float scale = this_view.getContext().getResources().getDisplayMetrics().density;
-        int heightInPx = (int) (heightInDp * scale + 0.5f);
-        layoutParams.height = heightInPx;
-        layoutParams.width = heightInPx;
-        check_box.setLayoutParams(layoutParams);
-    }
-
-
     public ContactAdapter(Context mContext, List<Contact> contactList) {
         this.mContext = mContext;
         this.contactList = contactList;
@@ -88,7 +62,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         this.contactList = filteredList;
         notifyDataSetChanged();
     }
-    public void update(){
+    public void remove(List<Contact> filteredList){
+        this.contactList = filteredList;
         notifyDataSetChanged();
     }
     @NonNull
@@ -113,9 +88,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         } else{
             holder.img_contact.setImageResource(R.drawable.phone_number);
         }
-        holder.display();
+        holder.display(holder.itemView);
         if (display){
-            if (delete_list.contains(position)){
+            if (delete_list.contains(contactList.get(position).getId())){
                 holder.check_box.setImageResource(R.drawable.baseline_check_box_24);
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.itemBackgroundSelected));
             }
@@ -124,33 +99,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                 holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.itemBackgroundDefault));
             }
         }
-
-
-        //delete_list.add(delete);
-
-        //notifyDataSetChanged();
-        /*
-        if (this.display){
-            holder.check_box.setVisibility(View.VISIBLE);
-
-            ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.check_box.getLayoutParams();
-            int heightInDp = 30;
-            float scale = this_view.getContext().getResources().getDisplayMetrics().density;
-            int heightInPx = (int) (heightInDp * scale + 0.5f);
-            layoutParams.height = heightInPx;
-            layoutParams.width = heightInPx;
-
-            /*
-            if (this.delete_list.contains(position)){
-                holder.check_box.setImageResource(R.drawable.baseline_check_box_24);
-            }
-            else{
-                holder.check_box.setImageResource(R.drawable.baseline_crop_square_24);
-            }
-        }*/
-        //holder.check_box.setImageResource(R.drawable.baseline_crop_square_24);
-
-
 
     }
     @Override
@@ -197,21 +145,17 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                 }
             });
         }
-        public void display() {
+        public void display(View itemview) {
             if (display) {
                 check_box.setVisibility(View.VISIBLE);
             }
             else{
                 check_box.setVisibility(View.INVISIBLE);
+                itemview.setBackgroundColor(ContextCompat.getColor(itemview.getContext(), R.color.itemBackgroundDefault));
                 delete_list.clear();
             }
         }
-
-
     }
-
-
-
 }
 
 
