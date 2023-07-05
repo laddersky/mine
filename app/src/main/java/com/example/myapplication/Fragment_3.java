@@ -9,23 +9,18 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
 import android.provider.MediaStore;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.QuoteSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,15 +41,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.CalendarMode;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
-import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 
 public class Fragment_3 extends Fragment {
@@ -67,8 +58,11 @@ public class Fragment_3 extends Fragment {
     TextView eventEmptyText;
     TextView contactEmptyText;
     TextView memoTextView;
+    TextView memoDateTextView;
     Button writeButton;
-    LinearLayout memoLayout;
+    ConstraintLayout memoLayout;
+    ConstraintLayout headerLayout;
+
     String MEMO_KEY = "memo";
     String fullDateString;
     int year;
@@ -117,6 +111,7 @@ public class Fragment_3 extends Fragment {
         eventEmptyText = view.findViewById(R.id.eventEmptyText);
         contactEmptyText = view.findViewById(R.id.contactEmptyText);
         writeButton = view.findViewById(R.id.writeButton);
+        headerLayout = view.findViewById(R.id.headerLayout);
         EditText multilineText = view.findViewById(R.id.multilineText);
         ConstraintLayout formLayout = view.findViewById(R.id.formLayout);
         Button saveButton = view.findViewById(R.id.saveButton);
@@ -134,6 +129,7 @@ public class Fragment_3 extends Fragment {
         MaterialCalendarView calendar = view.findViewById(R.id.calendar);
         LinearLayout linearLayout = view.findViewById(R.id.linearLayout);
         calendar.setSelectedDate(todayCalendarDay);
+        calendar.setSelectionColor(getContext().getColor(R.color.colorDateSelection));
         calendar.state().edit()
                 .isCacheCalendarPositionEnabled(false)
                 .setFirstDayOfWeek(Calendar.SUNDAY)
@@ -143,21 +139,23 @@ public class Fragment_3 extends Fragment {
         CalendarMinMaxDecorator minMaxDecorator = new CalendarMinMaxDecorator(todayCalendarDay, getContext());
         CalendarTodayDecorator todayDecorator = new CalendarTodayDecorator(getContext());
 
-        this.fullDateString = changeDateText(cal.getTimeInMillis());
+        this.fullDateString = getFullDateString(cal.getTimeInMillis());
+        dateText.setText(this.fullDateString);
         int lastDate = todayCalendarDay.getCalendar().getActualMaximum(Calendar.DAY_OF_MONTH);
         ArrayList<CalendarDay> calendarDayArrayList = new ArrayList<>();
         for (int i = 1; i <= lastDate; i++) {
             CalendarDay calendarDay = CalendarDay.from(currentYear, currentMonth, currentDate);
             calendarDay.getCalendar().set(Calendar.DATE, i);
 
-            String memo = pref.getString(changeDateText(calendarDay.getCalendar().getTimeInMillis()), "");
+            String memo = pref.getString(getFullDateString(calendarDay.getCalendar().getTimeInMillis()), "");
             if (!memo.equals("")) {
                 Log.d("fragment 3", "add decorator" + calendarDay.getCalendar().get(Calendar.YEAR) + "." + calendarDay.getCalendar().get(Calendar.MONTH) + "." + calendarDay.getCalendar().get(Calendar.DATE));
                 calendarDayArrayList.add(calendarDay);
             }
         }
-        calendar.addDecorators(minMaxDecorator, todayDecorator, new CalendarEventDecorator(calendarDayArrayList));
+        calendar.addDecorators(minMaxDecorator, todayDecorator, new CalendarEventDecorator(calendarDayArrayList, getContext()));
         calendar.setOnDateChangedListener((widget, date, selected) -> {
+            Log.d("fragment 3", "call date changed listener");
             if (date.getDate().getTime() > minMaxDecorator.getMaxDay().getDate().getTime()) {
                 linearLayout.setVisibility(View.GONE);
                 Toast.makeText(getContext(), "미래의 한줄 기록은 작성할 수 없어요", Toast.LENGTH_SHORT).show();
@@ -168,7 +166,8 @@ public class Fragment_3 extends Fragment {
                 this.month = date.getMonth() + 1;
                 this.date = date.getDay();
 
-                this.fullDateString = changeDateText(dateToTimestamp(this.year, this.month, this.date));
+                this.fullDateString = getFullDateString(dateToTimestamp(this.year, this.month, this.date));
+                dateText.setText(this.fullDateString);
                 if (cal.get(Calendar.YEAR) == this.year && cal.get(Calendar.MONTH) == this.month - 1 && cal.get(Calendar.DATE) == this.date) {
                     titleText.setText("오늘은 어떤 하루였나요?");
                 }
@@ -180,10 +179,7 @@ public class Fragment_3 extends Fragment {
                 getCallLogsByDate(this.year, this.month, this.date);
                 getMemoByDate(this.fullDateString);
                 multilineText.setText("");
-                writeButton.setVisibility(View.VISIBLE);
                 formLayout.setVisibility(View.GONE);
-                saveButton.setVisibility(View.GONE);
-                cancelButton.setVisibility(View.GONE);
                 imm.hideSoftInputFromWindow(multilineText.getWindowToken(), 0);
             }
         });
@@ -193,16 +189,15 @@ public class Fragment_3 extends Fragment {
             for (int i = 1; i <= lastDate1; i++) {
                 CalendarDay calendarDay = CalendarDay.from(date.getYear(), date.getMonth(), date.getDay());
                 calendarDay.getCalendar().set(Calendar.DATE, i);
-                String memo = pref.getString(changeDateText(calendarDay.getCalendar().getTimeInMillis()), "");
+                String memo = pref.getString(getFullDateString(calendarDay.getCalendar().getTimeInMillis()), "");
                 if (!memo.equals("")) {
-                    Log.d("fragment 3", "add decorator" + calendarDay.getCalendar().get(Calendar.YEAR) + "." + calendarDay.getCalendar().get(Calendar.MONTH) + "." + calendarDay.getCalendar().get(Calendar.DATE));
                     calendarDayArrayList1.add(calendarDay);
                 }
             }
-            calendar.addDecorator(new CalendarEventDecorator(calendarDayArrayList1));
+            calendar.addDecorator(new CalendarEventDecorator(calendarDayArrayList1, getContext()));
         });
         RecyclerView imageListView = view.findViewById(R.id.imageListByDate);
-        imageListAdapter = new ImageListAdapter(getContext(), 1);
+        imageListAdapter = new ImageListAdapter(getContext(), 1, false);
         imageListView.setAdapter(imageListAdapter);
         imageListView.addItemDecoration(new CirclePagerIndicatorDecoration(getContext()));
         imageListView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -236,18 +231,20 @@ public class Fragment_3 extends Fragment {
         Button getContactButton = view.findViewById(R.id.getContactButton);
         getContactButton.setOnClickListener(view15 -> callLogResultLauncher.launch(Manifest.permission.READ_CALL_LOG));
 
-
         memoTextView = view.findViewById(R.id.memoTextView);
         memoLayout = view.findViewById(R.id.memoLayout);
+        memoDateTextView = view.findViewById(R.id.memoDateTextView);
         getMemoByDate(this.fullDateString);
 
-        writeButton.setOnClickListener(view1 -> {
-            if (writeButton.getText().equals("수정하기")) {
-                multilineText.setText(memoTextView.getText());
-            }
+        ImageButton editButton = view.findViewById(R.id.editButton);
+        editButton.setOnClickListener(view1 -> {
+            multilineText.setText(memoTextView.getText());
+            memoLayout.setVisibility(View.GONE);
             formLayout.setVisibility(View.VISIBLE);
-            saveButton.setVisibility(View.VISIBLE);
-            cancelButton.setVisibility(View.VISIBLE);
+        });
+
+        writeButton.setOnClickListener(view1 -> {
+            formLayout.setVisibility(View.VISIBLE);
             writeButton.setVisibility(View.GONE);
             memoLayout.setVisibility(View.GONE);
         });
@@ -255,8 +252,6 @@ public class Fragment_3 extends Fragment {
             multilineText.setText("");
             writeButton.setVisibility(View.VISIBLE);
             formLayout.setVisibility(View.GONE);
-            saveButton.setVisibility(View.GONE);
-            cancelButton.setVisibility(View.GONE);
             getMemoByDate(this.fullDateString);
             imm.hideSoftInputFromWindow(multilineText.getWindowToken(), 0);
         });
@@ -270,14 +265,11 @@ public class Fragment_3 extends Fragment {
                 editor.apply();
                 getMemoByDate(this.fullDateString);
                 multilineText.setText("");
-                writeButton.setVisibility(View.VISIBLE);
-                writeButton.setText("수정하기");
                 formLayout.setVisibility(View.GONE);
-                saveButton.setVisibility(View.GONE);
-                cancelButton.setVisibility(View.GONE);
+                memoLayout.setVisibility(View.VISIBLE);
                 ArrayList<CalendarDay> calendarDays = new ArrayList<>();
                 calendarDays.add(CalendarDay.from(this.year, this.month - 1, this.date));
-                calendar.addDecorator(new CalendarEventDecorator(calendarDays));
+                calendar.addDecorator(new CalendarEventDecorator(calendarDays, getContext()));
                 imm.hideSoftInputFromWindow(multilineText.getWindowToken(), 0);
             }
         });
@@ -290,15 +282,12 @@ public class Fragment_3 extends Fragment {
             new Handler().postDelayed(() -> swipeRefreshLayout.setRefreshing(false), 1000);
         });
         NestedScrollView scrollView = view.findViewById(R.id.scrollView);
-        scrollView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(View view, int i, int i1, int i2, int i3) {
-                if (i1 == 0) {
-                    swipeRefreshLayout.setEnabled(true);
-                }
-                else {
-                    swipeRefreshLayout.setEnabled(false);
-                }
+        scrollView.setOnScrollChangeListener((View view13, int i, int i1, int i2, int i3) -> {
+            if (i1 == 0) {
+                swipeRefreshLayout.setEnabled(true);
+            }
+            else {
+                swipeRefreshLayout.setEnabled(false);
             }
         });
 
@@ -389,7 +378,7 @@ public class Fragment_3 extends Fragment {
         int columnIndexData = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         while (cursor.moveToNext()) {
             String imagePath = cursor.getString(columnIndexData);
-            imageList.add(new ImageItem(imagePath));
+            imageList.add(new ImageItem(imagePath, 0));
         }
         if (imageList.size() != 0) {
             imageEmptyText.setVisibility(View.GONE);
@@ -441,22 +430,14 @@ public class Fragment_3 extends Fragment {
     private void getMemoByDate(String fullDateString) {
         String memo = pref.getString(fullDateString, "");
         if (memo.equals("")) {
+            this.headerLayout.setVisibility(View.VISIBLE);
             this.memoLayout.setVisibility(View.GONE);
-            this.writeButton.setText("기록하기");
         }
         else {
+            this.headerLayout.setVisibility(View.GONE);
             this.memoLayout.setVisibility(View.VISIBLE);
-            Parcel parcel = Parcel.obtain();
-            parcel.writeInt(getContext().getColor(R.color.colorAccent)); // quote span stripe color .. adjust this as per your liking
-            parcel.writeInt(10); // quote span stripe width .. adjust this as per your liking
-            parcel.writeInt(16); // quote span gap with .. adjust this as per your liking
-            parcel.setDataPosition(0);
-            SpannableString string = new SpannableString(memo);
-            QuoteSpan quoteSpan = new QuoteSpan(parcel);
-            string.setSpan(quoteSpan, 0, string.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            this.memoTextView.setText("\"" + memo + "\"");
-            parcel.recycle(); // put the parcel object back in the pool
-            this.writeButton.setText("수정하기");
+            this.memoTextView.setText(memo);
+            this.memoDateTextView.setText(fullDateString);
         }
     }
     private void onGalleryPermissionAccepted(View view) {
@@ -504,13 +485,12 @@ public class Fragment_3 extends Fragment {
         }
         return 0;
     }
-    private String changeDateText(long time) {
+    private String getFullDateString(long time) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(time);
         String monthString = Integer.toString(cal.get(Calendar.MONTH) + 1);
         String dateString = Integer.toString(cal.get(Calendar.DATE));
         String fullDateString = cal.get(Calendar.YEAR) + "." + (monthString.length() == 1 ? "0" + monthString : monthString) + "." + (dateString.length() == 1 ? "0" + dateString : dateString);
-        dateText.setText(fullDateString);
         return fullDateString;
     }
 }

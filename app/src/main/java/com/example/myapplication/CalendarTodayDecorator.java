@@ -27,6 +27,6 @@ public class CalendarTodayDecorator implements DayViewDecorator {
     public void decorate(DayViewFacade view) {
         view.addSpan(new StyleSpan(Typeface.BOLD));
         view.addSpan(new RelativeSizeSpan(1.2f));
-        view.addSpan(new ForegroundColorSpan(Color.parseColor("#1D872A")));
+        view.addSpan(new ForegroundColorSpan(context.getColor(R.color.colorPrimary)));
     }
 }

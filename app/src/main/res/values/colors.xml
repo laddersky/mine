@@ -2,12 +2,13 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="memoBgColor">#EAF2F8</color>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="memoBgColor">#FFEFD1</color>
+    <color name="colorPrimary">#FF6847</color>
+    <color name="colorPrimaryDark">#FF542F</color>
+    <color name="colorSecondary">#FD9885</color>
+    <color name="colorAccent">#000000</color>
     <color name="textColor">#000000</color>
     <color name="background">#FFFFFF</color>
-    <color name="colorDateSelection">#e0e0e0</color>
+    <color name="colorDateSelection">#F1F1F1</color>
     <color name="lightGray">#d2d2d2</color>
 </resources>
