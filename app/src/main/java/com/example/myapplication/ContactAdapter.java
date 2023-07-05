@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,11 +18,16 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -29,7 +35,19 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     Context mContext;
     private Intent intent;
     List<Contact> contactList;
+    boolean display = false;
+    public Set<Integer> delete_list = new HashSet<Integer>() {};
+    public int delete;
+    View this_view;
+    public boolean isImageChanged = false;
     private OnItemClickListener mListener = null;
+    public interface OnItemLongClickListener {
+        void onItemLongClick(View v,int position);
+    }
+    private OnItemLongClickListener long_listener;
+    public void setOnItemClickListener(OnItemLongClickListener listener) {
+        this.long_listener = listener;
+    }
     public void setOnItemClickListener(OnItemClickListener listener){
         this.mListener = listener;
     }
@@ -37,21 +55,49 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         void onItemClick(View v, int position);
     }
 
+    public void mode_off() {
+        //check_box.setVisibility(View.INVISIBLE);
+
+        /*
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) check_box.getLayoutParams();
+        layoutParams.height = 0;
+        layoutParams.width = 0;
+        check_box.setLayoutParams(layoutParams);*/
+
+    }
+
+    public void mode_on() {
+        ImageView check_box = this_view.findViewById(R.id.imageView2);
+
+        check_box.setVisibility(View.VISIBLE);
+        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) check_box.getLayoutParams();
+        int heightInDp = 30;
+        float scale = this_view.getContext().getResources().getDisplayMetrics().density;
+        int heightInPx = (int) (heightInDp * scale + 0.5f);
+        layoutParams.height = heightInPx;
+        layoutParams.width = heightInPx;
+        check_box.setLayoutParams(layoutParams);
+    }
+
 
     public ContactAdapter(Context mContext, List<Contact> contactList) {
         this.mContext = mContext;
         this.contactList = contactList;
     }
-
-    int a = 0;
+    public void setFilteredList(List<Contact> filteredList){
+        this.contactList = filteredList;
+        notifyDataSetChanged();
+    }
+    public void update(){
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_contact,parent,false);
-        if (a == 0){
-            Toast.makeText(this.mContext, "myData", Toast.LENGTH_SHORT).show();
-            a++;
-        }
+
+        this.this_view = view;
+
         return new ContactViewHolder(view);
     }
 
@@ -61,17 +107,52 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         holder.name_contact.setText(contact.getName());
         holder.phone_contact.setText(contact.getPhone());
 
+
         if(contact.getPhoto() != null){
             Picasso.get().load(contact.getPhoto()).into(holder.img_contact);
         } else{
             holder.img_contact.setImageResource(R.drawable.phone_number);
         }
+        holder.display();
+        if (display){
+            if (delete_list.contains(position)){
+                holder.check_box.setImageResource(R.drawable.baseline_check_box_24);
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.itemBackgroundSelected));
+            }
+            else{
+                holder.check_box.setImageResource(R.drawable.baseline_crop_square_24);
+                holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.itemBackgroundDefault));
+            }
+        }
+
+
+        //delete_list.add(delete);
+
+        //notifyDataSetChanged();
+        /*
+        if (this.display){
+            holder.check_box.setVisibility(View.VISIBLE);
+
+            ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) holder.check_box.getLayoutParams();
+            int heightInDp = 30;
+            float scale = this_view.getContext().getResources().getDisplayMetrics().density;
+            int heightInPx = (int) (heightInDp * scale + 0.5f);
+            layoutParams.height = heightInPx;
+            layoutParams.width = heightInPx;
+
+            /*
+            if (this.delete_list.contains(position)){
+                holder.check_box.setImageResource(R.drawable.baseline_check_box_24);
+            }
+            else{
+                holder.check_box.setImageResource(R.drawable.baseline_crop_square_24);
+            }
+        }*/
+        //holder.check_box.setImageResource(R.drawable.baseline_crop_square_24);
+
 
 
     }
-
-
-
     @Override
     public int getItemCount() {
         return contactList.size();
@@ -79,34 +160,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public class ContactViewHolder extends RecyclerView.ViewHolder {
         TextView name_contact, phone_contact;
         CircleImageView img_contact;
-
+        ImageView check_box;
         public ContactViewHolder(@NonNull View itemView){
             super(itemView);
             name_contact = itemView.findViewById(R.id.name_contact);
             phone_contact = itemView.findViewById(R.id.phone_contact);
             img_contact = itemView.findViewById(R.id.img_contact);
-
+            check_box = itemView.findViewById(R.id.imageView2);
             itemView.setOnClickListener(new View.OnClickListener() {
-
-                /*public void new_page(View view, int pos){
-
-                    intent = new Intent(view.getContext(), Detail_Contact.class);
-                    intent.putExtra("name", contactList.get(pos).getName());
-                    intent.putExtra("phone_number", contactList.get(pos).getPhone());
-                    intent.putExtra("photo", contactList.get(pos).getPhoto());
-                    if (contactList.get(pos).getEmail() != null){
-                        intent.putExtra("email",contactList.get(pos).getEmail());
-                        //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
-                    }
-                    if (contactList.get(pos).getNote() != null){
-                        intent.putExtra("note",contactList.get(pos).getNote());
-                        //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
-                    }
-                    //intent.putExtra("email",contactList.get(pos).getEmail());
-                    //Toast.makeText(view.getContext(), null, Toast.LENGTH_SHORT).show();
-                    //startActivityForResult(,intent, 1234,null);
-                    view.getContext().startActivity(intent);
-                }*/
                 @Override
                 public void onClick(View view) {
                     int pos = getAdapterPosition();
@@ -119,7 +180,34 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                     }
                 }
             });
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (long_listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            long_listener.onItemLongClick(v,position);
+
+                            //check_box = v.findViewById(R.id.imageView2);
+                            //check_box.setVisibility(View.INVISIBLE);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
         }
+        public void display() {
+            if (display) {
+                check_box.setVisibility(View.VISIBLE);
+            }
+            else{
+                check_box.setVisibility(View.INVISIBLE);
+                delete_list.clear();
+            }
+        }
+
+
     }
 
 

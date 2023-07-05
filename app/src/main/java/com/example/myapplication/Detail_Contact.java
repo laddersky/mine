@@ -27,10 +27,13 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class Detail_Contact extends AppCompatActivity {
     private Intent intent;
     private String name, photo, phone, email, note,contactID;
-    private ImageView Photo;
+    boolean Is_add;
+    private CircleImageView Photo;
     private EditText Name,Phone,Email,Note;
     FloatingActionButton back_btn,save_btn;
     ActivityResultLauncher<Intent> activityResultLauncher;
@@ -46,6 +49,7 @@ public class Detail_Contact extends AppCompatActivity {
         email = intent.getStringExtra("email");
         note = intent.getStringExtra("note");
         contactID = intent.getStringExtra("id");
+        Is_add = intent.getBooleanExtra("add",false);
 
         back_btn = findViewById(R.id.Back);
         save_btn = findViewById(R.id.Save);
@@ -83,70 +87,29 @@ public class Detail_Contact extends AppCompatActivity {
         save_btn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
+                if (!Is_add){
+                    Store(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
+                            Note.getText().toString(),contactID);
+                }
+                else{
+                    Add(Name.getText().toString(),Phone.getText().toString(), Email.getText().toString(),
+                            Note.getText().toString(),contactID);
+                }
 
-                /*
-                ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-                ContentValues values = new ContentValues();
-                values.put(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, Name.getText().toString());
-                ContentResolver contentResolver = getContentResolver();
-                Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, Long.parseLong(contactID));
-                ContentProviderOperation.Builder builder = ContentProviderOperation.newUpdate(contactUri)
-                        .withValues(values);
-                operations.add(builder.build());
-                try {
-                    ContentProviderResult[] results = contentResolver.applyBatch(ContactsContract.AUTHORITY, operations);
-                    // 결과 처리
-                } catch (RemoteException | OperationApplicationException e) {
-                    e.printStackTrace();
-                    // 예외 처리
-                }*/
-                /*
-                ContentValues values = new ContentValues();
-                values.put(ContactsContract.Contacts.DISPLAY_NAME, Name.getText().toString());
-                getContentResolver().update(
-                        ContactsContract.Contacts.CONTENT_URI,
-                        values,
-                        ContactsContract.Contacts._ID + " = ?",
-                        new String[]{contactID}
-                );*/
-                Toast.makeText(view.getContext(), Name.getText().toString(), Toast.LENGTH_SHORT).show();
-
+                //setResult(9001,intent);
             }
         });
         back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 intent = new Intent(v.getContext(), Fragment_1.class);
+                //v.getContext().startActivity(intent);
                 intent.putExtra("name_data", Name.getText().toString());
                 intent.putExtra("phone_data", Phone.getText().toString());
                 intent.putExtra("email_data", Email.getText().toString());
                 intent.putExtra("note_data", Note.getText().toString());
                 intent.putExtra("id_data", contactID);
-
                 setResult(9001,intent);
-                /*
-                intent.putExtra("phone_number",Phone.getText().toString());
-                //intent.putExtra("photo", Photo.getText().toString());
-                if (Email.getText().toString()!= null){
-                    intent.putExtra("email",Email.getText().toString());
-                    //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
-                }
-                if (Note.getText().toString() != null){
-                    intent.putExtra("note",Note.getText().toString());
-                    //Toast.makeText(view.getContext(), "됐다", Toast.LENGTH_SHORT).show();
-                }
-                //Toast.makeText(v.getContext(), Name.getText().toString(), Toast.LENGTH_SHORT).show();
-                //v.getContext().startActivity(intent);
-
-                activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result ->{
-                    if (result.getResultCode() == 9001){
-                        Intent intent = result.getData();
-                        String name = Name.getText().toString();
-                    }
-                });*/
-
-
                 finish();
 
             }
@@ -155,6 +118,80 @@ public class Detail_Contact extends AppCompatActivity {
 
 
 
+    }
+    public void Store(String name, String phone, String email, String note, String id){
+        ContentResolver contentResolver = getContentResolver();
+
+        ContentValues name_content = new ContentValues();
+        String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+
+        name_content.put(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
+        String name_where_arg[] = new String[]{id,ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE};
+        contentResolver.update(ContactsContract.Data.CONTENT_URI, name_content, where, name_where_arg);
+
+        ContentValues phone_content = new ContentValues();
+        phone_content.put(ContactsContract.CommonDataKinds.Phone.NUMBER, phone);
+        String phone_where_arg[] = new String[]{id,ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE};
+        contentResolver.update(ContactsContract.Data.CONTENT_URI, phone_content, where, phone_where_arg);
+
+        ContentValues email_content = new ContentValues();
+        email_content.put(ContactsContract.CommonDataKinds.Email.ADDRESS, email);
+        String email_where_arg[] = new String[]{id,ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE};
+        contentResolver.update(ContactsContract.Data.CONTENT_URI, email_content, where, email_where_arg);
+
+        ContentValues note_content = new ContentValues();
+        note_content.put(ContactsContract.CommonDataKinds.Note.NOTE, note);
+        String note_where_arg[] = new String[]{id,ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE};
+        contentResolver.update(ContactsContract.Data.CONTENT_URI, note_content, where, note_where_arg);
+
+
+
+    }
+    public void Add(String name, String phone, String email, String note, String id){
+        ContentResolver resolver = getContentResolver();
+
+        // 새로운 연락처를 추가할 Operation 리스트를 생성합니다.
+        ArrayList<ContentProviderOperation> operations = new ArrayList<>();
+
+        // 연락처의 MIME 타입을 설정합니다.
+        operations.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                .build());
+
+        // 연락처의 이름을 추가합니다.
+        operations.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                .build());
+
+        // 연락처의 전화번호를 추가합니다.
+        operations.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, phone)
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                .build());
+
+        operations.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Email.ADDRESS, email)
+                .build());
+
+        operations.add(ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Note.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Note.NOTE, note)
+                .build());
+
+        // 연락처를 ContentProvider에 적용합니다.
+        try {
+            resolver.applyBatch(ContactsContract.AUTHORITY, operations);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
